@@ -6,20 +6,20 @@ export default (function() {
   const wordConsts = require("./wordConsts");
   
 
-  var wordutils = {
+  const wordutils = {
     toArray: function toArray(objlist) {
-      var res = [];
-      for (var i = 1; i <= objlist.Count; i++) {
+      const res = [];
+      for (let i = 1; i <= objlist.Count; i++) {
         res.push(objlist.Item(i));
       }
       return res;
     }
   };
 
-  var worddoc = function(document) {
-    var doc = document;
+  const worddoc = function(document) {
+    const doc = document;
 
-    var api = {
+    const api = {
       close: function close(option) {
         doc.Close(option);
       },
@@ -68,7 +68,7 @@ export default (function() {
         });
       },
       setNewPagenumberingForLastSection: function() {
-        var section = doc.Sections.Last;
+        const section = doc.Sections.Last;
         wordutils.toArray(section.Footers).forEach(footer => {
           footer.PageNumbers.RestartNumberingAtSection = true;
           footer.PageNumbers.StartingNumber = 1;
@@ -79,14 +79,14 @@ export default (function() {
     return api;
   };
 
-  var wordapp = function(isvisible) {
+  const wordapp = function(isvisible) {
 
     console.log( 'winax', winax );
 
-    var app;
-    var docs;
+    let app;
+    let docs;
 
-    var initAppAndDocs = function() {
+    const initAppAndDocs = function() {
       if (!app || !app.ProductCode) {
         app = winax.Object("Word.Application");
         app.Visible = isvisible;
@@ -94,7 +94,7 @@ export default (function() {
       }
     };
 
-    var api = {
+    const api = {
       setVisible: function(b) {
         app.Visible = b;
       },
@@ -116,7 +116,7 @@ export default (function() {
       },
       openDocument: function openDocument(path) {
         initAppAndDocs();
-        var doc = docs.Open(path);
+        const doc = docs.Open(path);
         if (isvisible) worddoc(doc).activate();
         return doc;
       },
@@ -124,7 +124,7 @@ export default (function() {
         return app ? app.ActiveDocument : null;
       },
       getDocumentByName: function getDocumentByName(docname) {
-        for (var i = 1; i <= docs.Count; i++) {
+        for (let i = 1; i <= docs.Count; i++) {
           if (docs.Item(i).Name.includes(docname)) {
             return docs.Item(i);
           }
@@ -146,11 +146,11 @@ export default (function() {
       }
     };
 
-    var compare = {
+    const compare = {
       compare: function compare(doc1, doc2, compareDoc) {
-        var d1 = api.openDocument(doc1);
-        var d2 = api.openDocument(doc2);
-        var docCompare = app.CompareDocuments(
+        const d1 = api.openDocument(doc1);
+        const d2 = api.openDocument(doc2);
+        const docCompare = app.CompareDocuments(
           d1,
           d2,
           wordConsts.WdCompareDestination.wdCompareDestinationNew
@@ -163,12 +163,12 @@ export default (function() {
       }
     };
 
-    var createprodukt = (function() {
-      var fcts = {
+    const createprodukt = (function() {
+      const fcts = {
         pasteFrom: function pasteFrom(docname, selectionJoin) {
           // Documents.Open FileName:="Abschnitt 1.docx", ConfirmConversions:=False, ReadOnly:=False,
-          var inDoc = docs.Open(docname, false, true);
-          var selectionInDoc = app.Selection;
+          const inDoc = docs.Open(docname, false, true);
+          const selectionInDoc = app.Selection;
           selectionInDoc.WholeStory();
           selectionInDoc.Copy();
           inDoc.Close(wordConsts.WdSaveOptions.wdDoNotSaveChanges);
@@ -181,12 +181,12 @@ export default (function() {
           joinDoc
         ) {
           initAppAndDocs();
-          var newDoc = docs.Add(
+          const newDoc = docs.Add(
             wordTemplate,
             false,
             wordConsts.WdNewDocumentType.wdNewBlankDocument
           );
-          var selection = app.Selection;
+          const selection = app.Selection;
 
           beitraege.forEach(beitrag => {
             selection.EndKey(wordConsts.WdUnits.wdStory); // -> go to end of document
@@ -201,15 +201,15 @@ export default (function() {
             selection.InsertBreak(wordConsts.WdBreakType.wdSectionBreakNextPage);
             createprodukt.pasteFrom(anlage, selection);
 
-            var footers = newDoc.Sections.Last.Footers;
+            const footers = newDoc.Sections.Last.Footers;
             wordutils.toArray(footers).forEach(footer => {
-              var pageNumbers = footer.PageNumbers;
+              const pageNumbers = footer.PageNumbers;
               pageNumbers.RestartNumberingAtSection = true;
               pageNumbers.StartingNumber = 1;
             });
           });
 
-          //var tempFile = File.createTempFile("AJacobDocumentJoiner-", ".docx");
+          //const tempFile = File.createTempFile("AJacobDocumentJoiner-", ".docx");
           newDoc.SaveAs(joinDoc);
           newDoc.Close(wordConsts.WdSaveOptions.wdDoNotSaveChanges);
           app.Quit(wordConsts.WdSaveOptions.wdDoNotSaveChanges);
